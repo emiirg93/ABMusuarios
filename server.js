@@ -10,6 +10,12 @@ app.use(express.static(__dirname, {index: 'index.html'}))
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
+app.use(function(req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
+  });
+
 app.get('/traer', function (req, res) {
     var url = require('url');
     var parts = url.parse(req.url, true);
@@ -58,16 +64,16 @@ app.post('/eliminar', function (req, res) {
 
 app.post('/agregar', function (req, res) {
     var collection = req.body.collection;
-    var nuevoObjeto = req.body.heroe;
+    var nuevoObjeto = req.body.objeto;
 
         require('fs').readFile(__dirname + getPathFromCollection(collection), 'utf8', function (err, data) {
             if (err) {
                  throw err; // error handling
             }else{
                 array = JSON.parse(data);
-                //nuevoObjeto.id = getID(array);
+                nuevoObjeto.id = getID(array);
                 nuevoObjeto.active = "true";
-                nuevoObjeto.created_dttm = new Date().toLocaleString();
+                //nuevoObjeto.created_dttm = new Date().toLocaleString();
                 array.push(nuevoObjeto);
                 require('fs').writeFileSync(__dirname + getPathFromCollection(collection), JSON.stringify(array));
                 //build response
@@ -91,11 +97,11 @@ app.post('/modificar',function (req, res) {
             }
             array = JSON.parse(data);
             //obtengo index del id que necesito
-            var index = array.findIndex(function(obj){return obj.id === object.heroe.id || obj.id.toString() === object.heroe.id;})
+            var index = array.findIndex(function(obj){return obj.id === object.objeto.id || obj.id.toString() === object.objeto.id;})
             var aux = array[index];
-            object.heroe.active = aux.active;
-            object.heroe.created_dttm=aux.created_dttm;
-            array[index] = object.heroe;
+            object.objeto.active = aux.active;
+            object.objeto.created_dttm=aux.created_dttm;
+            array[index] = object.objeto;
 
             require('fs').writeFileSync(__dirname + getPathFromCollection(req.body.collection), JSON.stringify(array));
             var response = {
@@ -106,7 +112,7 @@ app.post('/modificar',function (req, res) {
 });
 
 function getPathFromCollection(collection){
-    if(collection==="Personas"){
+    if(collection==="personas"){
         return '/data/people.json';
     }
     if(collection==="posts"){

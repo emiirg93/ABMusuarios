@@ -1,101 +1,82 @@
-const server_url = "http://localhost:3000/";
 var xhr;
+function traerPersonas() {
+  $.ajax({
+    url: "http://localhost:3000/traer/?collection=personas",
+    beforeSend: function () {
+      $("#divSpinner").show();
+      $(".table").hide();
+    },
+    success: function (array) {
+      crearTabla(array.data);
+    },
+    complete: function () {
+      $(".table").show();
+      $("#divSpinner").slideUp(800);
+    }
+  })
 
-function traerListaHeroes(callback) {
-    xhr = new XMLHttpRequest();
-    xhr.onreadystatechange = function(){
-        if (this.readyState == 4) {
-            if(this.status == 200){
-                var resp = JSON.parse(this.response); 
-                console.log(resp.message);
-                //refrescarTabla(resp.data);
-                callback(resp.data);
-                //return resp.data;
-            }
-        }
-        return null;
-    };
-    var url = server_url + "traer?collection=heroes";
-    xhr.open("GET",url,true);
-    xhr.setRequestHeader("Content-Type", "application/json");
-    xhr.send();
-    //return listaHeroes;
 }
 
-function insertarHeroe(heroe) {
+function guardarPersona(persona) {
 
-    // Acá va el código de la peticion ajax para insertar el nuevo heroe (POST)
-    var data = {
-        "collection":"heroes",
-        "heroe": heroe
+  var body = { 'collection': 'personas', 'objeto': persona };
+
+  $.ajax({
+    type: 'POST',
+    async: true,
+    url: 'http://localhost:3000/agregar',
+    dataType: 'json',
+    contentType: 'application/json',
+    data: JSON.stringify(body),
+    beforeSend: function () {
+      $("#bodyTabla").children().remove();
+      traerPersonas();
     }
-    $.ajax({
-        url: server_url + "agregar", 
-        method:'POST',
-        data:JSON.stringify(data),
-        contentType: 'application/json',
-        //dataType: 'application/json',
-        success: function(result){
-           console.log(result.message);
-           ejecutarTransaccion('actualizarLista');
-        },
-        error: function(jqXHR,textStatus,errorThrown ){
-            console.log(errorThrown);
-        },
-        complete:function(jqXHR, textStatus){
-            console.log(textStatus);
-        }
-    });
+  })
 }
 
-function eliminarHeroe(heroe) {
-    var data = {
-        "collection":"heroes",
-        "id": heroe.id
-    }
+function eliminarPersona(id) {
 
-    $.ajax({
-        url: server_url + "eliminar", 
-        method:'POST',
-        data:JSON.stringify(data),
-        contentType: 'application/json',
-        //dataType: 'application/json',
-        success: function(result){
-           console.log(result.message);
-           ejecutarTransaccion('actualizarLista');
-        },
-        error: function(jqXHR,textStatus,errorThrown ){
-            console.log(errorThrown);
-        },
-        complete:function(jqXHR, textStatus){
-            console.log(textStatus);
-        }
-    });
+  var body = {
+    "collection": "personas",
+    "id": id
+  }
+
+  $.ajax({
+    type: 'POST',
+    async: true,
+    url: 'http://localhost:3000/eliminar',
+    dataType: 'json',
+    contentType: 'application/json',
+    data: JSON.stringify(body),
+
+
+    success: function (array) {
+      $("#bodyTabla").children().remove();
+      traerPersonas();
+    }
+  })
+
+
 }
 
-function modificarHeroe(heroe) {
+function modificarPersona(persona) {
+  var body = {
+    "collection": "personas",
+    "objeto": persona
+  }
 
-      // Acá va el código de la peticion ajax para insertar el nuevo heroe (POST)
-      var data = {
-        "collection":"heroes",
-        "heroe": heroe
+  $.ajax({
+    type: 'POST',
+    async: true,
+    url: 'http://localhost:3000/modificar',
+    dataType: 'json',
+    contentType: 'application/json',
+    data: JSON.stringify(body),
+
+    success: function (array) {
+      $("#bodyTabla").children().remove();
+      traerPersonas();
     }
-    $.ajax({
-        url: server_url + "modificar", 
-        method:'POST',
-        data:JSON.stringify(data),
-        contentType: 'application/json',
-        //dataType: 'application/json',
-        success: function(result){
-           console.log(result.message);
-           ejecutarTransaccion('actualizarLista');
-        },
-        error: function(jqXHR,textStatus,errorThrown ){
-            console.log(errorThrown);
-        },
-        complete:function(jqXHR, textStatus){
-            console.log(textStatus);
-        }
-    });
-
+  })
 }
